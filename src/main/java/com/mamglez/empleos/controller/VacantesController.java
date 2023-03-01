@@ -6,9 +6,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -16,38 +19,64 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.mamglez.empleos.model.Vacante;
+import com.mamglez.empleos.service.ICategoriasService;
 import com.mamglez.empleos.service.IVacantesService;
+import com.mamglez.empleos.util.Utileria;
 
 @Controller
 @RequestMapping("/vacantes")
 public class VacantesController {
 	
+	@Value("${empleosapp.ruta.imagenes}")
+	private String ruta;
+	
 	@Autowired
 	private IVacantesService vacantesService;
 	
+	@Autowired
+	private ICategoriasService categoriasService;
+	
 	@GetMapping("/index")
 	public String mostrarIndex(Model model) {
-		//TODO 1. Obtener todas las vacantes (recuperarlas con la clase de servicio).
-		List<Vacante> vacantes = vacantesService.buscarTodas();
-		//TODO 2. Agregar al modelo el listado de vacantes.
-		model.addAttribute("vacantes", vacantes);
-		//TODO 3. Renderizar las vacantes en la vista (integrar el archivo listaVacantes.html).
-		//TODO 4. Agregar al menu una opcion llamada "Vacantes" configurando la URL "vacantes/index".
-		return "vacantes/listVacantes";
+		List<Vacante> lista = vacantesService.buscarTodas();
+		model.addAttribute("vacantes", lista);
+		return "vacantes/listaVacantes";
 	}
 	
 	@GetMapping("/create")
-	public String crear() {
+	public String crear(Vacante vacante, Model model) {
+		model.addAttribute("categorias", categoriasService.buscarTodas());
 		return "vacantes/formVacante";
 	}
 	
 	@PostMapping("/save")
-	public String guardar(Vacante vacante) {
+	public String guardar(Vacante vacante, BindingResult result, RedirectAttributes attributes, @RequestParam("archivoImagen") MultipartFile multiPart) {
+		if(result.hasErrors()) {
+			for(ObjectError error: result.getAllErrors()) {
+				System.out.println("ocurrio un error: " + error.getDefaultMessage());
+			}
+			return "vacantes/formVacante";
+		}
+		
+		if (!multiPart.isEmpty()) {
+			// String ruta = "/empleos/img-vacantes/"; // Linux/MAC
+			//String ruta = "c:/empleos/img-vacantes/"; // Windows
+			String nombreImagen = Utileria.guardarArchivo(multiPart, ruta);
+			if (nombreImagen != null) { // La imagen si se subio
+				// Procesamos la variable nombreImagen
+				vacante.setImagen(nombreImagen);
+			}
+		}
+
+		
 		vacantesService.guardar(vacante);
+		attributes.addFlashAttribute("msg", "Registro ok");
 		System.out.println("Nombre Vacante: " + vacante);
-		return "vacantes/listVacantes";
+		return "redirect:/vacantes/index";
 	}
 	
 //	@PostMapping("/save")
