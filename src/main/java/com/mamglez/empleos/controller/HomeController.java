@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.mamglez.empleos.model.Vacante;
 import com.mamglez.empleos.service.IVacantesService;
@@ -52,9 +53,14 @@ public class HomeController {
 
 	@GetMapping("/")
 	public String mostrarHome(Model model) {
-		List<Vacante> lista = vacantesService.buscarTodas();
-		model.addAttribute("vacantes", lista);
+//		List<Vacante> lista = vacantesService.buscarTodas();
+//		model.addAttribute("vacantes", lista);
 		return "home";
+	}
+	
+	@ModelAttribute
+	public void setGenericos(Model model) {
+		model.addAttribute("vacantes", vacantesService.buscarDestacadas());
 	}
 	
 }

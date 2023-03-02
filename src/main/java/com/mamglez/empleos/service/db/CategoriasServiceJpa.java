@@ -1,27 +1,39 @@
 package com.mamglez.empleos.service.db;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import com.mamglez.empleos.model.Categoria;
+import com.mamglez.empleos.repository.ICategoriasRepository;
 import com.mamglez.empleos.service.ICategoriasService;
 
+@Service
+//@Primary
 public class CategoriasServiceJpa implements ICategoriasService {
+	
+	@Autowired
+	private ICategoriasRepository categoriasRepo;
 
 	@Override
 	public void guardar(Categoria categoria) {
-		// TODO Auto-generated method stub
-
+		categoriasRepo.save(categoria);
 	}
 
 	@Override
 	public List<Categoria> buscarTodas() {
-		// TODO Auto-generated method stub
-		return null;
+		return categoriasRepo.findAll();
 	}
 
 	@Override
 	public Categoria buscarPorId(Integer idCategoria) {
-		// TODO Auto-generated method stub
+		Optional<Categoria> optional = categoriasRepo.findById(idCategoria);
+		if(optional.isPresent()) {
+			return optional.get();
+		}
 		return null;
 	}
 

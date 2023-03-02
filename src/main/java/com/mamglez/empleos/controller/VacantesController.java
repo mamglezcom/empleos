@@ -5,7 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.websocket.server.PathParam;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -15,6 +18,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +42,7 @@ public class VacantesController {
 	private IVacantesService vacantesService;
 	
 	@Autowired
+	@Qualifier("categoriasServiceJpa")
 	private ICategoriasService categoriasService;
 	
 	@GetMapping("/index")
@@ -49,7 +54,8 @@ public class VacantesController {
 	
 	@GetMapping("/create")
 	public String crear(Vacante vacante, Model model) {
-		model.addAttribute("categorias", categoriasService.buscarTodas());
+		//se ha creado metodo setGenericos para crear un atributo pra todos los metodos
+		//model.addAttribute("categorias", categoriasService.buscarTodas());
 		return "vacantes/formVacante";
 	}
 	
@@ -100,11 +106,22 @@ public class VacantesController {
 //		return "vacantes/listVacantes";
 //	}
 	
-	@GetMapping("/delete")
-	public String eliminar(@RequestParam("id") int idVacante, Model model) {
+	@GetMapping("/delete/{id}")
+	public String eliminar(@PathVariable("id") Integer idVacante, RedirectAttributes attributes) {
 		System.out.println("borrando vacante id: " + idVacante);
-		model.addAttribute("id",idVacante);
-		return "mensaje";
+		vacantesService.eliminar(idVacante);
+		attributes.addFlashAttribute("msg", "Registro eliminado");
+		//model.addAttribute("id",idVacante);
+		//return "mensaje";
+		return "redirect:/vacantes/index";
+	}
+	
+	@GetMapping("/edit/{id}")
+	public String editar(@PathVariable("id") Integer idVacante, Model model) {
+		Vacante vacante = vacantesService.buscarPorId(idVacante);
+		model.addAttribute("vacante", vacante);
+		
+		return "vacantes/formVacante";
 	}
 	
 	@GetMapping("/view/{id}")
@@ -119,6 +136,11 @@ public class VacantesController {
 	public void initBinder(WebDataBinder webDataBinder) {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 		webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(sdf, false));
+	}
+	
+	@ModelAttribute
+	public void setGenericos(Model model) {
+		model.addAttribute("categorias", categoriasService.buscarTodas());
 	}
 	
 }
