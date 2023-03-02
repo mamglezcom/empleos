@@ -5,14 +5,17 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.mamglez.empleos.model.Categoria;
+import com.mamglez.empleos.model.Vacante;
 import com.mamglez.empleos.repository.ICategoriasRepository;
 import com.mamglez.empleos.service.ICategoriasService;
 
 @Service
-//@Primary
+@Primary
 public class CategoriasServiceJpa implements ICategoriasService {
 	
 	@Autowired
@@ -40,6 +43,11 @@ public class CategoriasServiceJpa implements ICategoriasService {
 	@Override
 	public void eliminar(Integer idCategoria) {
 		categoriasRepo.deleteById(idCategoria);
+	}
+	
+	@Override
+	public Page<Categoria> buscarTodas(Pageable page) {
+		return categoriasRepo.findAll(page);
 	}
 
 }

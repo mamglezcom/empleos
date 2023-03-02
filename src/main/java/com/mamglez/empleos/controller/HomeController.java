@@ -7,9 +7,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -17,11 +22,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.mamglez.empleos.model.Perfil;
 import com.mamglez.empleos.model.Usuario;
 import com.mamglez.empleos.model.Vacante;
+import com.mamglez.empleos.service.ICategoriasService;
 import com.mamglez.empleos.service.IUsuariosService;
 import com.mamglez.empleos.service.IVacantesService;
 
 @Controller
 public class HomeController {
+	
+	@Autowired
+	private ICategoriasService categoriasService;
 	
 	@Autowired
 	private IVacantesService vacantesService;
@@ -85,9 +94,31 @@ public class HomeController {
 		return "home";
 	}
 	
+	@GetMapping("/search")
+	public String buscar(@ModelAttribute("search") Vacante vacante, Model model) {
+		System.out.println("buscando por " + vacante);
+		ExampleMatcher matcher = ExampleMatcher
+				.matching()
+				.withMatcher("descripcion", ExampleMatcher.GenericPropertyMatchers.contains());
+		Example<Vacante> example = Example.of(vacante,matcher);
+		List<Vacante> lista = vacantesService.buscarByExample(example);
+		model.addAttribute("vacantes", lista);
+		return "home";
+	}
+	
+	//emptyAsNull true if an empty String is to be transformed into null
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+	}
+	
 	@ModelAttribute
 	public void setGenericos(Model model) {
+		Vacante vacanteSearch = new Vacante();
+		vacanteSearch.reset();
+		model.addAttribute("search", vacanteSearch);
 		model.addAttribute("vacantes", vacantesService.buscarDestacadas());
+		model.addAttribute("categorias", categoriasService.buscarTodas());
 	}
 	
 }
