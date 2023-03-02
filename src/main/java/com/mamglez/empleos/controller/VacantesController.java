@@ -85,27 +85,6 @@ public class VacantesController {
 		return "redirect:/vacantes/index";
 	}
 	
-//	@PostMapping("/save")
-//	public String guardar(@RequestParam("nombre") String nombre, 
-//			@RequestParam("descripcion") String descripcion,
-//			@RequestParam("categoria") String categoria,
-//			@RequestParam("estatus") String estatus,
-//			@RequestParam("fecha") String fecha,
-//			@RequestParam("destacado") int destacado,
-//			@RequestParam("salario") double salario,
-//			//@RequestParam("archivoImagen") String archivoImagen,
-//			@RequestParam("detalles") String detalles) {
-//		
-//		System.out.println("Nombre Vacante: " + nombre);
-//		System.out.println("Descripcion Vacante: " + descripcion);
-//		System.out.println("Estatus Vacante: " + estatus);
-//		System.out.println("Fecha pub Vacante: " + fecha);
-//		System.out.println("Destacado: " + destacado);
-//		System.out.println("Salario Vacante: " + salario);
-//		System.out.println("Detalle Vacante: " + detalles);
-//		return "vacantes/listVacantes";
-//	}
-	
 	@GetMapping("/delete/{id}")
 	public String eliminar(@PathVariable("id") Integer idVacante, RedirectAttributes attributes) {
 		System.out.println("borrando vacante id: " + idVacante);
@@ -142,5 +121,26 @@ public class VacantesController {
 	public void setGenericos(Model model) {
 		model.addAttribute("categorias", categoriasService.buscarTodas());
 	}
+	
+//	@PostMapping("/save")
+//	public String guardar(@RequestParam("nombre") String nombre, 
+//			@RequestParam("descripcion") String descripcion,
+//			@RequestParam("categoria") String categoria,
+//			@RequestParam("estatus") String estatus,
+//			@RequestParam("fecha") String fecha,
+//			@RequestParam("destacado") int destacado,
+//			@RequestParam("salario") double salario,
+//			//@RequestParam("archivoImagen") String archivoImagen,
+//			@RequestParam("detalles") String detalles) {
+//		
+//		System.out.println("Nombre Vacante: " + nombre);
+//		System.out.println("Descripcion Vacante: " + descripcion);
+//		System.out.println("Estatus Vacante: " + estatus);
+//		System.out.println("Fecha pub Vacante: " + fecha);
+//		System.out.println("Destacado: " + destacado);
+//		System.out.println("Salario Vacante: " + salario);
+//		System.out.println("Detalle Vacante: " + detalles);
+//		return "vacantes/listVacantes";
+//	}
 	
 }

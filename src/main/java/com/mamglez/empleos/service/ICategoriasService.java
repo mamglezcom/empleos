@@ -11,4 +11,6 @@ public interface ICategoriasService {
 	List<Categoria> buscarTodas();
 	
 	Categoria buscarPorId(Integer idCategoria);	
+	
+	void eliminar(Integer idCategoria);
 }

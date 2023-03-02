@@ -11,8 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.mamglez.empleos.model.Perfil;
+import com.mamglez.empleos.model.Usuario;
 import com.mamglez.empleos.model.Vacante;
+import com.mamglez.empleos.service.IUsuariosService;
 import com.mamglez.empleos.service.IVacantesService;
 
 @Controller
@@ -20,6 +25,28 @@ public class HomeController {
 	
 	@Autowired
 	private IVacantesService vacantesService;
+	
+	@Autowired
+	private IUsuariosService usuariosService;
+	
+	@GetMapping("/signup")
+	public String registrarse(Usuario usuario) {
+		return "formRegistro";
+	}
+	
+	@PostMapping("/signup")
+	public String guardarRegistro(Usuario usuario, RedirectAttributes attributes) {
+		System.out.println("registrando usuario...");
+		usuario.setFechaRegistro(new Date());
+		usuario.setEstatus(1);
+		Perfil perfil = new Perfil();
+		perfil.setId(3);
+		usuario.agregar(perfil);
+		usuariosService.guardar(usuario);
+		attributes.addFlashAttribute("msg", "usuario insertado");
+		
+		return "redirect:/usuarios/index";
+	}
 	
 	@GetMapping("/tabla")
 	public String mostrarTabla(Model model) {
