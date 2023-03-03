@@ -1,22 +1,29 @@
 package com.mamglez.empleos.controller;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.mamglez.empleos.model.Perfil;
@@ -28,6 +35,9 @@ import com.mamglez.empleos.service.IVacantesService;
 
 @Controller
 public class HomeController {
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	@Autowired
 	private ICategoriasService categoriasService;
@@ -45,6 +55,9 @@ public class HomeController {
 	
 	@PostMapping("/signup")
 	public String guardarRegistro(Usuario usuario, RedirectAttributes attributes) {
+		String pwdPlano = usuario.getPassword();
+		String pwdEncriptado = passwordEncoder.encode(pwdPlano);
+		usuario.setPassword(pwdEncriptado);
 		System.out.println("registrando usuario...");
 		usuario.setFechaRegistro(new Date());
 		usuario.setEstatus(1);
@@ -55,6 +68,22 @@ public class HomeController {
 		attributes.addFlashAttribute("msg", "usuario insertado");
 		
 		return "redirect:/usuarios/index";
+	}
+	
+	@GetMapping("/index")
+	public String mostrarIndex(Authentication auth, HttpSession session) {
+		String username = auth.getName();
+		System.out.println("nombre usuario: " + username);
+		for(GrantedAuthority rol: auth.getAuthorities()) {
+			System.out.println("ROL: " + rol.getAuthority());
+		}
+		if(session.getAttribute("usuario") == null) {
+			Usuario usuario = usuariosService.buscarPorUsername(username);
+			usuario.setPassword(null);
+			System.out.println("usuario: " + usuario);
+			session.setAttribute("usuario", usuario);
+		}
+		return "redirect:/";
 	}
 	
 	@GetMapping("/tabla")
@@ -104,6 +133,25 @@ public class HomeController {
 		List<Vacante> lista = vacantesService.buscarByExample(example);
 		model.addAttribute("vacantes", lista);
 		return "home";
+	}
+	
+	@GetMapping("/bcrypt/{texto}")
+	@ResponseBody
+	public String encriptar(@PathVariable("texto") String texto) {
+		return texto + " Encriptato con Bcrypt: " + passwordEncoder.encode(texto);
+	}
+	
+	@GetMapping("/login" )
+	public String mostrarLogin() {
+		return "formLogin";
+	}
+	
+	@GetMapping("/logout")
+	public String logout(HttpServletRequest request){
+		SecurityContextLogoutHandler logoutHandler =
+		new SecurityContextLogoutHandler();
+		logoutHandler.logout(request, null, null);
+		return "redirect:/login";
 	}
 	
 	//emptyAsNull true if an empty String is to be transformed into null

@@ -5,5 +5,7 @@ import com.mamglez.empleos.model.Usuario;
 
 
 public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
+	
+	Usuario findByUsername(String username);
 
 }
