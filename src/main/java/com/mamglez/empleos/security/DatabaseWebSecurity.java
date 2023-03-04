@@ -43,6 +43,8 @@ public class DatabaseWebSecurity {
 	// Las vistas públicas no requieren autenticación
 	.antMatchers("/", "/signup", "/search", "/vacantes/view/*", "/bcrypt/*").permitAll()
 	// Asignar permisos a URLs por ROLES
+	.antMatchers("/solicitudes/create/**", "/solicitudes/save/**").hasAnyAuthority("USUARIO")
+	.antMatchers("/solicitudes/**").hasAnyAuthority("SUPERVISOR","ADMINISTRADOR")
 	.antMatchers("/vacantes/**").hasAnyAuthority("SUPERVISOR","ADMINISTRADOR")
 	.antMatchers("/categorias/**").hasAnyAuthority("SUPERVISOR","ADMINISTRADOR")
 	.antMatchers("/usuarios/**").hasAnyAuthority("ADMINISTRADOR")
