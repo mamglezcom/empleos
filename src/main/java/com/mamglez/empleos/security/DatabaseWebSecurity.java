@@ -28,8 +28,8 @@ public class DatabaseWebSecurity {
 		users.setUsersByUsernameQuery("select username,password,estatus from usuarios u where username=?");
 		users.setAuthoritiesByUsernameQuery(
 						"select u.username,p.perfil from usuarioperfil up " 
-						+ "inner join Usuarios u on u.id = up.idUsuario "
-						+ "inner join Perfiles p on p.id = up.idPerfil " 
+						+ "inner join usuarios u on u.id = up.idUsuario "
+						+ "inner join perfiles p on p.id = up.idPerfil " 
 						+ "where u.username=?");
 		return users;
 	}
